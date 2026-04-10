@@ -1,0 +1,50 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: turrant-postgres
+    environment:
+      POSTGRES_DB: turrant
+      POSTGRES_USER: turrant
+      POSTGRES_PASSWORD: turrantdev
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U turrant -d turrant"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    container_name: turrant-api
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgres://turrant:turrantdev@postgres:5432/turrant
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  ui:
+    build:
+      context: .
+      dockerfile: ui/Dockerfile
+    container_name: turrant-ui
+    depends_on:
+      - api
+    ports:
+      - "8080:80"
+
+  adminer:
+    image: adminer:4
+    container_name: turrant-adminer
+    depends_on:
+      - postgres
+    ports:
+      - "8081:8080"
+
+volumes:
+  postgres_data:

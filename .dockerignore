@@ -1,0 +1,9 @@
+node_modules
+ui/node_modules
+api/node_modules
+ui/dist
+api/dist
+.git
+.github
+*.log
+.DS_Store
